@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Teacher: Cups by Baari</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <canvas id="statusChart"></canvas>
+    <script>
+        const socket = io('http://localhost:3000');
+        const ctx = document.getElementById('statusChart').getContext('2d');
+        const chart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['Lost', 'Confused', 'Clear'],
+                datasets: [{
+                    data: [0, 0, 0],
+                    backgroundColor: ['red', 'yellow', 'green']
+                }]
+            },
+            options: {
+                scales: {
+                    x: {
+                        stacked: true,
+                    },
+                    y: {
+                        beginAtZero: true,
+                        stacked: true
+                    }
+                }
+            }
+        });
+
+        socket.on('statusUpdate', (studentStatus) => {
+            let sumStatus = {
+                lost: 0,
+                confused: 0,
+                clear: 0
+            };
+
+            for (const studentId in studentStatus) {
+                const status = studentStatus[studentId].status;
+
+                if (status === 'lost') {
+                    sumStatus.lost++;
+                } else if (status === 'confused') {
+                    sumStatus.confused++;
+                } else if (status === 'clear') {
+                    sumStatus.clear++;
+                }
+            }
+
+            chart.data.datasets[0].data = [sumStatus.lost, sumStatus.confused, sumStatus.clear];
+            chart.update();
+        });
+    </script>
+</body>
+</html>

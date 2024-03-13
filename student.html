@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student - Cups by Baari</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.min.js"></script>
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f4f4f4;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            color: #333;
+        }
+        button {
+            background-color: #4CAF50;
+            border: none;
+            color: white;
+            padding: 15px 32px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        p {
+            font-size: 1.5em;
+        }
+    </style>
+    <script>
+        const studentId = Math.random().toString(36).substring(2, 8);
+        const socket = io('http://localhost:3000');
+        
+        function sendStatus(status) {
+            choice = status
+            // Function to update the current choice element
+            function updateCurrentChoice(choice) {
+                document.getElementById('currentChoice').textContent = choice;
+            }
+            updateCurrentChoice(choice);
+            fetch('http://localhost:3000/status', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ studentId: studentId, status })
+            });
+        }
+        
+        // Function to send a ping with student ID every 15 seconds
+        function sendPing() {
+            fetch('http://localhost:3000/ping', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ studentId: studentId})
+            });
+        }
+        
+        // Call sendPing function every 15 seconds
+        setInterval(sendPing, 5000);
+    </script>
+</head>
+<body>
+    <button onclick="sendStatus('clear')">Clear</button>
+    <button onclick="sendStatus('confused')">Confused</button>
+    <button onclick="sendStatus('lost')">Lost</button>
+    <p>You are <span id="currentChoice"></span></p>
+</body>
+</html>

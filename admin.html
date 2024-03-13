@@ -1,0 +1,19 @@
+<!-- main.html -->
+<title>My Web Page</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.min.js"></script>
+    <script>
+        const socket = io('http://localhost:3000');
+        socket.on('statusUpdate', (studentStatus) => {
+            document.getElementById('status').textContent = JSON.stringify(studentStatus);
+        });
+    </script>
+</head>
+<body>
+    <pre id="status"></pre>
+</body>
+</html>
