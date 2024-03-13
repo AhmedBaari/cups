@@ -6,6 +6,8 @@ const cors = require("cors");
 
 const app = express();
 const server = http.createServer(app);
+const fs = require("fs");
+
 const io = require("socket.io")(server, {
   cors: {
     origin: "*",
@@ -33,6 +35,16 @@ app.post("/status", (req, res) => {
   studentStatus[studentId] = { status, lastPing: Date.now() };
   io.emit("statusUpdate", studentStatus);
   res.sendStatus(200);
+});
+
+app.get("/:filename", (req, res) => {
+  const { filename } = req.params;
+  const filePath = `${__dirname}/public/${filename}.html`;
+  if (fs.existsSync(filePath)) {
+    res.sendFile(filePath);
+  } else {
+    res.sendStatus(404);
+  }
 });
 
 app.post("/ping", (req, res) => {
