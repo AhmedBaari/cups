@@ -10,7 +10,7 @@
 <body>
     <canvas id="statusChart"></canvas>
     <script>
-        const socket = io('http://cups.baarify.me:3000');
+        const socket = io('https://cups.baarify.me:3000');
         const ctx = document.getElementById('statusChart').getContext('2d');
         const chart = new Chart(ctx, {
             type: 'bar',
