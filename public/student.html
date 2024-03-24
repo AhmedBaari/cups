@@ -37,7 +37,11 @@
     </style>
     <script>
         const studentId = Math.random().toString(36).substring(2, 8);
-        const socket = io('https://cups.baarify.me:3000');
+        // Get the current URL
+        const url = new URL(window.location.href);
+        // Remove any slugs and get only base URL
+        const baseUrl = url.origin;
+        const socket = io(baseUrl);
         
         function sendStatus(status) {
             choice = status
@@ -46,7 +50,7 @@
                 document.getElementById('currentChoice').textContent = choice;
             }
             updateCurrentChoice(choice);
-            fetch('https://cups.baarify.me:3000/status', {
+            fetch(baseUrl+'/status', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ studentId: studentId, status })
@@ -55,7 +59,7 @@
         
         // Function to send a ping with student ID every 15 seconds.
         function sendPing() {
-            fetch('https://cups.baarify.me:3000/ping', {
+            fetch(baseUrl+'/ping', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ studentId: studentId})

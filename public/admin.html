@@ -7,7 +7,11 @@
 <head>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.min.js"></script>
     <script>
-        const socket = io('https://cups.baarify.me:3000');
+                // Get the current URL
+        const url = new URL(window.location.href);
+        // Remove any slugs and get only base URL
+        const baseUrl = url.origin;
+        const socket = io(baseUrl);
         socket.on('statusUpdate', (studentStatus) => {
             document.getElementById('status').textContent = JSON.stringify(studentStatus);
         });
