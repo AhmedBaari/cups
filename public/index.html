@@ -6,33 +6,55 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .chart-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+    </style>
 </head>
 <body>
-    <canvas id="statusChart"></canvas>
+    <canvas id="statusChart"></canvas><p id="totalStudents"></p>
     <script>
-        // Get the current URL
         const url = new URL(window.location.href);
-        // Remove any slugs and get only base URL
         const baseUrl = url.origin;
         const socket = io(baseUrl);
         const ctx = document.getElementById('statusChart').getContext('2d');
         const chart = new Chart(ctx, {
             type: 'bar',
             data: {
-                labels: ['Lost', 'Confused', 'Clear'],
+                labels: ['Status'],
                 datasets: [{
-                    data: [0, 0, 0],
-                    backgroundColor: ['red', 'yellow', 'green']
+                    label: 'Lost',
+                    data: [0],
+                    backgroundColor: 'red'
+                }, {
+                    label: 'Confused',
+                    data: [0],
+                    backgroundColor: 'yellow'
+                }, {
+                    label: 'Clear',
+                    data: [0],
+                    backgroundColor: 'green'
                 }]
             },
             options: {
                 scales: {
                     x: {
+                        display: false,
                         stacked: true,
                     },
                     y: {
+                        display: false,
                         beginAtZero: true,
                         stacked: true
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
                     }
                 }
             }
@@ -44,10 +66,10 @@
                 confused: 0,
                 clear: 0
             };
-
+        
             for (const studentId in studentStatus) {
                 const status = studentStatus[studentId].status;
-
+        
                 if (status === 'lost') {
                     sumStatus.lost++;
                 } else if (status === 'confused') {
@@ -56,8 +78,12 @@
                     sumStatus.clear++;
                 }
             }
-
-            chart.data.datasets[0].data = [sumStatus.lost, sumStatus.confused, sumStatus.clear];
+        
+            const total = sumStatus.lost + sumStatus.confused + sumStatus.clear;
+            document.getElementById('totalStudents').textContent = `Total students: ${total}`;
+            chart.data.datasets[0].data = [sumStatus.lost / total * 100];
+            chart.data.datasets[1].data = [sumStatus.confused / total * 100];
+            chart.data.datasets[2].data = [sumStatus.clear / total * 100];
             chart.update();
         });
     </script>

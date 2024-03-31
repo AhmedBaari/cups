@@ -63,7 +63,7 @@ io.on("connection", (socket) => {
 setInterval(() => {
   const now = Date.now();
   for (const studentId in studentStatus) {
-    if (now - studentStatus[studentId].lastPing > 5000) { // 5000 ms = 5 seconds
+    if (now - studentStatus[studentId].lastPing > 15000) { // 5000 ms = 5 seconds
       delete studentStatus[studentId];
     }
   }
