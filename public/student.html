@@ -1,82 +1,139 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Student - Cups by Baari</title>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.min.js"></script>
-    <style>
-        body {
-            font-family: 'Roboto', sans-serif;
-            background-color: #333;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            margin: 0;
-            color: #f4f4f4;
-        }
-        button {
-            background-color: #4CAF50;
-            border: none;
-            color: white;
-            padding: 15px 32px;
-            text-align: center;
-            text-decoration: none;
-            display: inline-block;
-            font-size: 16px;
-            margin: 4px 2px;
-            cursor: pointer;
-            border-radius: 4px;
-        }
-        p {
-            font-size: 1.5em;
-        }
-    </style>
-    <script>
-        const studentId = Math.random().toString(36).substring(2, 8);
-        // Get the current URL
-        const url = new URL(window.location.href);
-        // Remove any slugs and get only base URL
-        const baseUrl = url.origin;
-        const socket = io(baseUrl);
-        
-        function sendStatus(status) {
-            choice = status
-            // Function to update the current choice element
-            function updateCurrentChoice(choice) {
-                document.getElementById('currentChoice').textContent = choice;
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Student Feedback - Pandas with Issac</title>
+        <link
+            href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap"
+            rel="stylesheet"
+        />
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.min.js"></script>
+        <style>
+            :root {
+                --primary-color: #4caf50;
+                --secondary-color: #2196f3;
+                --danger-color: #f44336;
+                --background-color: #1e1e1e;
+                --text-color: #ffffff;
             }
-            updateCurrentChoice(choice);
-            fetch(baseUrl+'/status', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ studentId: studentId, status })
-            });
-        }
-        
-        // Function to send a ping with student ID every 15 seconds.
-        function sendPing() {
-            fetch(baseUrl+'/ping', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ studentId: studentId})
-            });
-        }
-        
-        // Call sendPing function every 15 seconds
-        setInterval(sendPing, 5000);
-    </script>
-</head>
-<body>
-    <button onclick="sendStatus('clear')">Clear</button>
-    <button onclick="sendStatus('confused')">Confused</button>
-    <button onclick="sendStatus('lost')">Lost</button>
-    <p>You are <span id="currentChoice"></span></p>
-    <footer>
-        <p>Pandas with Issac | Developed by Baari</p>
-    </footer>
-</body>
+
+            body {
+                font-family: "Poppins", sans-serif;
+                background-color: var(--background-color);
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                min-height: 100vh;
+                margin: 0;
+                color: var(--text-color);
+            }
+
+            .container {
+                text-align: center;
+                padding: 2rem;
+                background-color: rgba(255, 255, 255, 0.1);
+                border-radius: 15px;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            }
+
+            h1 {
+                font-size: 2.5rem;
+                margin-bottom: 2rem;
+            }
+
+            .button-group {
+                display: flex;
+                gap: 1rem;
+                margin-bottom: 2rem;
+            }
+
+            button {
+                background-color: var(--primary-color);
+                border: none;
+                color: white;
+                padding: 12px 24px;
+                text-align: center;
+                text-decoration: none;
+                display: inline-block;
+                font-size: 1rem;
+                font-weight: 500;
+                cursor: pointer;
+                border-radius: 50px;
+                transition: all 0.3s ease;
+            }
+
+            button:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            }
+
+            button.confused {
+                background-color: var(--secondary-color);
+            }
+
+            button.lost {
+                background-color: var(--danger-color);
+            }
+
+            #status {
+                font-size: 1.5rem;
+                font-weight: 500;
+                margin-bottom: 2rem;
+            }
+
+            footer {
+                margin-top: 2rem;
+                font-size: 0.9rem;
+                opacity: 0.7;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h1>How are you following?</h1>
+            <div class="button-group">
+                <button onclick="sendStatus('clear')">Clear</button>
+                <button class="confused" onclick="sendStatus('confused')">
+                    Confused
+                </button>
+                <button class="lost" onclick="sendStatus('lost')">Lost</button>
+            </div>
+            <p id="status">You are: <span id="currentChoice">-</span></p>
+        </div>
+        <footer>
+            <p>
+                Developed by
+                <a href="https://linkedin.com/in/ahmedbaari" target="_blank"
+                    >Ahmed Baari</a
+                >
+            </p>
+        </footer>
+
+        <script>
+            const studentId = Math.random().toString(36).substring(2, 8);
+            const baseUrl = new URL(window.location.href).origin;
+            const socket = io(baseUrl);
+
+            function sendStatus(status) {
+                document.getElementById("currentChoice").textContent = status;
+                fetch(`${baseUrl}/status`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ studentId, status }),
+                });
+            }
+
+            function sendPing() {
+                fetch(`${baseUrl}/ping`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ studentId }),
+                });
+            }
+
+            setInterval(sendPing, 5000);
+        </script>
+    </body>
 </html>

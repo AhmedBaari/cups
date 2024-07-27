@@ -1,91 +1,193 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Teacher: Cups by Baari</title>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        .chart-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-        }
-    </style>
-</head>
-<body>
-    <canvas id="statusChart"></canvas><p id="totalStudents"></p>
-    <script>
-        const url = new URL(window.location.href);
-        const baseUrl = url.origin;
-        const socket = io(baseUrl);
-        const ctx = document.getElementById('statusChart').getContext('2d');
-        const chart = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: ['Status'],
-                datasets: [{
-                    label: 'Lost',
-                    data: [0],
-                    backgroundColor: 'red'
-                }, {
-                    label: 'Confused',
-                    data: [0],
-                    backgroundColor: 'yellow'
-                }, {
-                    label: 'Clear',
-                    data: [0],
-                    backgroundColor: 'green'
-                }]
-            },
-            options: {
-                scales: {
-                    x: {
-                        display: false,
-                        stacked: true,
-                    },
-                    y: {
-                        display: false,
-                        beginAtZero: true,
-                        stacked: true
-                    }
-                },
-                plugins: {
-                    legend: {
-                        display: false
-                    }
-                }
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Teacher Dashboard</title>
+        <link
+            href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap"
+            rel="stylesheet"
+        />
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <style>
+            :root {
+                --background-color: #1e1e1e;
+                --text-color: #ffffff;
+                --card-background: #2c2c2c;
+                --lost-color: #f44336;
+                --confused-color: #ffc107;
+                --clear-color: #4caf50;
             }
-        });
 
-        socket.on('statusUpdate', (studentStatus) => {
-            let sumStatus = {
-                lost: 0,
-                confused: 0,
-                clear: 0
-            };
-        
-            for (const studentId in studentStatus) {
-                const status = studentStatus[studentId].status;
-        
-                if (status === 'lost') {
-                    sumStatus.lost++;
-                } else if (status === 'confused') {
-                    sumStatus.confused++;
-                } else if (status === 'clear') {
-                    sumStatus.clear++;
-                }
+            body {
+                font-family: "Poppins", sans-serif;
+                background-color: var(--background-color);
+                color: var(--text-color);
+                margin: 0;
+                padding: 20px;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                min-height: 100vh;
             }
-        
-            const total = sumStatus.lost + sumStatus.confused + sumStatus.clear;
-            document.getElementById('totalStudents').textContent = `Total students: ${total}`;
-            chart.data.datasets[0].data = [sumStatus.lost / total * 100];
-            chart.data.datasets[1].data = [sumStatus.confused / total * 100];
-            chart.data.datasets[2].data = [sumStatus.clear / total * 100];
-            chart.update();
-        });
-    </script>
-</body>
+
+            .dashboard {
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 20px;
+                max-width: 1200px;
+                width: 100%;
+            }
+
+            .card {
+                background-color: var(--card-background);
+                border-radius: 10px;
+                padding: 20px;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+                flex: 1 1 300px;
+            }
+
+            h1,
+            h2 {
+                text-align: center;
+                margin-bottom: 20px;
+            }
+
+            .chart-container {
+                position: relative;
+                height: 300px;
+                width: 100%;
+            }
+
+            .status-summary {
+                display: flex;
+                justify-content: space-around;
+                margin-top: 20px;
+            }
+
+            .status-item {
+                text-align: center;
+            }
+
+            .status-count {
+                font-size: 2em;
+                font-weight: 600;
+            }
+
+            .status-label {
+                font-size: 0.9em;
+                opacity: 0.8;
+            }
+
+            footer {
+                margin-top: 40px;
+                text-align: center;
+                opacity: 0.7;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>Teacher Dashboard</h1>
+        <div class="dashboard">
+            <div class="card">
+                <h2>Student Status</h2>
+                <div class="chart-container">
+                    <canvas id="statusChart"></canvas>
+                </div>
+                <div class="status-summary">
+                    <div class="status-item">
+                        <div id="lostCount" class="status-count">0</div>
+                        <div class="status-label">Lost</div>
+                    </div>
+                    <div class="status-item">
+                        <div id="confusedCount" class="status-count">0</div>
+                        <div class="status-label">Confused</div>
+                    </div>
+                    <div class="status-item">
+                        <div id="clearCount" class="status-count">0</div>
+                        <div class="status-label">Clear</div>
+                    </div>
+                </div>
+            </div>
+            <div class="card">
+                <h2>Total Students</h2>
+                <div
+                    id="totalStudents"
+                    style="font-size: 3em; text-align: center"
+                >
+                    0
+                </div>
+            </div>
+        </div>
+        <footer>
+            <p>Developed by Ahmed Baari</p>
+        </footer>
+
+        <script>
+            const baseUrl = new URL(window.location.href).origin;
+            const socket = io(baseUrl);
+            const ctx = document.getElementById("statusChart").getContext("2d");
+            const chart = new Chart(ctx, {
+                type: "doughnut",
+                data: {
+                    labels: ["Lost", "Confused", "Clear"],
+                    datasets: [
+                        {
+                            data: [0, 0, 0],
+                            backgroundColor: [
+                                "var(--lost-color)",
+                                "var(--confused-color)",
+                                "var(--clear-color)",
+                            ],
+                        },
+                    ],
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: "bottom",
+                            labels: {
+                                color: "var(--text-color)",
+                            },
+                        },
+                    },
+                },
+            });
+
+            socket.on("statusUpdate", (studentStatus) => {
+                let sumStatus = {
+                    lost: 0,
+                    confused: 0,
+                    clear: 0,
+                };
+
+                for (const studentId in studentStatus) {
+                    const status = studentStatus[studentId].status;
+                    sumStatus[status]++;
+                }
+
+                const total =
+                    sumStatus.lost + sumStatus.confused + sumStatus.clear;
+
+                document.getElementById("totalStudents").textContent = total;
+                document.getElementById("lostCount").textContent =
+                    sumStatus.lost;
+                document.getElementById("confusedCount").textContent =
+                    sumStatus.confused;
+                document.getElementById("clearCount").textContent =
+                    sumStatus.clear;
+
+                chart.data.datasets[0].data = [
+                    sumStatus.lost,
+                    sumStatus.confused,
+                    sumStatus.clear,
+                ];
+                chart.update();
+            });
+        </script>
+    </body>
 </html>

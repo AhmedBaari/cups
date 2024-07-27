@@ -30,6 +30,10 @@ app.use(
   })
 );
 
+app.get("/", (req, res) => {
+  res.redirect('/student');
+});
+
 app.post("/status", (req, res) => {
   const { studentId, status } = req.body;
   studentStatus[studentId] = { status, lastPing: Date.now() };
