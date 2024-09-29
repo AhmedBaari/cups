@@ -1,5 +1,5 @@
 <!-- main.html -->
-<title>My Web Page</title>
+<title>CUPS admin</title>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <!DOCTYPE html>
@@ -7,9 +7,7 @@
 <head>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.min.js"></script>
     <script>
-                // Get the current URL
         const url = new URL(window.location.href);
-        // Remove any slugs and get only base URL
         const baseUrl = url.origin;
         const socket = io(baseUrl);
         socket.on('statusUpdate', (studentStatus) => {
